@@ -1,0 +1,532 @@
+<!doctype html>
+<html>
+	<head>
+
+    <title>fuzzzzzzzzzzzzzz!!!!!</title>
+	
+	<meta http-equiv="Cache-Control" content="no-cache"/>
+	<div contentEditable id="a">
+	<style>
+			*:nth-child(5)::before {
+				content: 'moof';
+				display: inline-block;
+			}
+			*:nth-child(3) {
+				position: relative;
+				display: inline-block;
+				overflow: scroll;
+				background-color: rgba(190, 190, 255, 0.5);
+			}
+			*:nth-child(7) {
+				display: none;
+				content: 'a';
+			}
+	</style>
+	
+    <script type='text/javascript' src='logging.js'></script>
+	
+      <script type='text/javascript'>
+	  
+			
+		var logger = null;
+		
+		function grind()
+		{
+			logger = new LOGGER( "broasword" );
+			
+			logger.starting();
+			
+			
+			/* BEGIN YOUR FUZZING CODE HERE */
+			var N = 624;
+			var M = 397;
+			var MATRIX_A = 0x9908b0df;   /* constant vector a */
+			var UPPER_MASK = 0x80000000; /* most significant w-r bits */
+			var LOWER_MASK = 0x7fffffff; /* least significant r bits */
+			var mt = new Array(N); /* the array for the state vector */
+			function init_genrand(s)
+			{
+					mt[0]= s >>> 0;
+					for (mti=1; mti<N; mti++) {
+						  var s = mt[mti-1] ^ (mt[mti-1] >>> 30);
+						mt[mti] = (((((s & 0xffff0000) >>> 16) * 1812433253) << 16) + (s & 0x0000ffff) * 1812433253)
+						+ mti;
+					}
+			}
+			function genrand_int32()
+			{
+					var mag01 = new Array(0x0, MATRIX_A);
+					if (mti >= N) { /* generate N words at one time */
+						  if (mti == N+1)   /* if init_genrand() has not been called, */
+						      init_genrand(5489); /* a default initial seed is used */
+						  for (kk=0;kk<N-M;kk++) {
+						      y = (mt[kk]&UPPER_MASK)|(mt[kk+1]&LOWER_MASK);
+						      mt[kk] = mt[kk+M] ^ (y >>> 1) ^ mag01[y & 0x1];
+						      y = (mt[kk]&UPPER_MASK)|(mt[kk+1]&LOWER_MASK);
+						  }
+						  y = (mt[N-1]&UPPER_MASK)|(mt[0]&LOWER_MASK);
+						  mti = 0;
+					}
+					y = mt[mti++];
+					y ^= (y >>> 18);
+					return y >>> 0;
+			}
+			function genrand_res53()
+			{ 
+					var a=genrand_int32()>>>5, b=genrand_int32()>>>6; 
+					return(a*67108864.0+b)*(1.0/9007199254740992.0); 
+			} 
+			init_genrand(1287694101414);
+
+			function $(id) {
+				return document.getElementById(id);
+			}
+			function getRandom(n) {
+				return Math.floor(genrand_res53() * n);
+			}
+			function getRandomHtml(iters) {
+				var s2 = new Date();
+				function shouldStop() {
+					if (new Date() - s2 > 1000 || html.length > 100000) {
+						return true;
+					}
+				}
+				var html = '';
+				var stack = [];
+				for (var i = 0; i < iters; i++) {
+					if (shouldStop()) {
+						break;
+					}
+					var n = 18;
+					n += Math.floor(stack.length / 5);
+					var s = stack.toString();
+					if (s.indexOf('xmp') != -1) {
+						n += 40;
+					}
+					if (s.indexOf('noframes') != -1) {
+						n += 10;
+					}
+					if (s.indexOf('noscript') != -1) {
+						n += 10;
+					}
+					if (s.indexOf('frameset') != -1) {
+						n += 30;
+					}
+					var x;
+					switch (x = getRandom(n)) {
+						case 1:
+							html += '<div>';
+							stack.push('div');
+							break;
+						case 2:
+							html += '<font family="Times" size="' + getRandom(7) + '" color="blue">';
+							stack.push('font');
+							break;
+						case 3:
+							html += '<select><!-- --><option>';
+							stack.push('select');
+							stack.push('option');
+							break;
+						case 4:
+						//	html += '<iframe src="about:blank">';
+						//	stack.push('iframe');
+							html += '<img src="http://www.google.com/favicon.ico">';
+							break;
+						case 5:
+							html += '<br>';
+							stack.push('br');
+							break;
+						case 6:
+							html += '<xmp>\n\t';
+							stack.push('xmp');
+							break;
+						case 7:
+							//html += '<frameset rows="*"><frame src="about:blank">';
+							//stack.push('frame');
+							//stack.push('frameset');
+							html += '<nobr>';
+							stack.push('nobr');
+							break;
+						case 8:
+							//html += '<noframes>';
+							//stack.push('noframes');
+							html += '<wbr>';
+							break;
+						case 9:
+							//html += '<noscript>';
+							//stack.push('noscript');
+							html += '<input>';
+							break;
+						case 10:
+							html += '<div contentEditable="false">';
+							stack.push('div');
+							break;
+						case 11:
+							html += '<span contentEditable>';
+							stack.push('span');
+							break;
+						case 12:
+							html += '<script id="' + Math.random() + '" type="javascript">void 0;<\/script>';
+							break;
+						case 13:
+							html += '<style type="text/css">foo { color: blue }\n';
+							stack.push('style');
+							break;
+						case 14:
+							html += '<table><thead><tr><th colspan=2>hello!</th></tr></thead><tbody><tr><td rowspan=2>hmm</td><td>asdf</td></tr><tr><td>last cell';
+							stack.push('table');
+							stack.push('tbody');
+							stack.push('tr');
+							stack.push('td');
+							break;
+						default:
+							if (stack.length) {
+								html += '</'+ stack.pop() + '>';
+							}
+							break;
+					}
+					if (html.length % 2) {
+						html += '[' + i + ']';
+					}
+				}
+				html += stack;
+				return html;
+			}
+				
+			function replaceContent(elt) {
+				elt.innerHTML = getRandomHtml(66666); /* added extra 66 */
+				var x = elt.offsetWidth;
+			}
+			
+			function getNodes(elt) {
+				var nodes = [];
+				function g(elt) {
+					for (var i = 0; i < elt.childNodes.length; i++) {
+						if (nodes.length % 100 == 0 && elt.childNodes[i].data) {
+						logger.log("elt.childNodes["+i+"].data = new Date();","broasword",1);
+							elt.childNodes[i].data = new Date();
+						logger.log("//new date************","broasword",1);
+						}
+						logger.log("nodes.push(elt.childNodes["+i+"]);","broasword",1);
+						nodes.push(elt.childNodes[i]);
+						logger.log("//pushing the child nodes************","broasword",1);
+					}
+				}
+				g(elt);
+				return nodes;
+			}
+			
+			function bustAMove() {
+				try {
+					switch (getRandom(44)) {
+						case 0:
+						case 1:
+						case 2:
+						case 3:
+							try {
+								logger.log("document.execCommand('insertHTML', null, getRandomHtml(10));","broasword",1);
+								document.execCommand('insertHTML', null, getRandomHtml(10));
+								logger.log("//inserting html************","broasword",1);
+							} catch(msie) {
+							logger.log("document.selection.createRange().pasteHTML(getRandomHtml(10));","broasword",1);
+								document.selection.createRange().pasteHTML(getRandomHtml(10));
+								logger.log("//create range************","broasword",1);
+							}
+							break;
+						case 4:
+							logger.log("document.execCommand('bold', null, true);","broasword",1);
+							document.execCommand('bold', null, true);
+							logger.log("//executing bold in doc************","broasword",1);
+							break;
+						case 5:document.execCommand('indent', null, true);
+								break;
+								
+						case 6:document.execCommand('usecss', null, !getRandom(2));
+								break;
+						case 7:
+						case 8:
+							logger.log("document.execCommand('undo', null, true);","broasword",1);
+							document.execCommand('undo', null, true);
+							break;
+						case 9:
+							logger.log("document.execCommand('delete', null, true);","broasword",1);
+							document.execCommand('delete', null, true);
+							break;
+						case 10:
+							logger.log("document.execCommand('selectall', null, true);","broasword",1);
+							document.execCommand('selectall', null, true);
+							switch (getRandom(3)) {
+								case 0: 
+									logger.log("document.execCommand('delete', null, true);","broasword",1);
+									document.execCommand('fontname', null, 'Comic Sans MS');
+									break;
+								case 1:
+									logger.log("document.execCommand('fontname', null, 'monospace');","broasword",1);
+									document.execCommand('fontname', null, 'monospace');
+									break;
+								case 2:
+								logger.log("document.execCommand('fontname', null, 'monospace');","broasword",1);
+									document.execCommand('fontname', null, getRandomHtml(100));
+									break;
+							}
+							break;
+						case 11:
+							logger.log("document.execCommand('indent', null, true);","broasword",1);
+							document.execCommand('indent', null, true);
+							break;
+						case 12:
+							logger.log("document.execCommand('outdent', null, true);","broasword",1);
+							document.execCommand('outdent', null, true);
+							break;
+						case 13:
+							logger.log("document.execCommand('formatblock', null, 'p');","broasword",1);
+							document.execCommand('formatblock', null, 'p');
+							break;
+						case 14:
+							logger.log("document.execCommand('formatblock', null, 'div');","broasword",1);
+							document.execCommand('formatblock', null, 'div');
+							break;
+						case 15:
+							logger.log("document.execCommand('decreasefontsize', null, true);","broasword",1);
+							document.execCommand('decreasefontsize', null, true);
+							break;
+						case 16:
+							logger.log("document.execCommand('superscript', null, true);","broasword",1);
+							document.execCommand('superscript', null, true);
+							break;
+						case 17:
+							logger.log("document.execCommand('subscript', null, true);","broasword",1);
+							document.execCommand('subscript', null, true);
+							break;
+						case 18:
+							logger.log("document.execCommand('redo', null, true);","broasword",1);
+							document.execCommand('redo', null, true);
+							break;
+						case 19:
+							logger.log("document.execCommand('insertOrderedList', null, true);","broasword",1);
+							document.execCommand('insertOrderedList', null, true);
+							break;
+						case 20:
+							logger.log("document.execCommand('backColor', null, '#e0e0e0');","broasword",1);
+							document.execCommand('backColor', null, '#e0e0e0');
+							break;
+						case 21:
+							logger.log("document.execCommand('formatblock', null, 'xmp');","broasword",1);
+							document.execCommand('formatblock', null, 'xmp');
+							break;
+						case 22:
+							logger.log("document.execCommand('hilitecolor', null, 'yellow');","broasword",1);
+							document.execCommand('hilitecolor', null, 'yellow');
+							break;
+						case 23:
+							logger.log("document.execCommand('createlink', null, getRandomHtml(10));","broasword",1);
+							document.execCommand('createlink', null, getRandomHtml(10));
+							break;
+						case 24:
+							logger.log("document.execCommand('increasefontsize', null, true);","broasword",1);
+							document.execCommand('increasefontsize', null, true);
+							break;
+						case 25:
+							logger.log("document.execCommand('insertimage', null, getRandomHtml(10));","broasword",1);
+							document.execCommand('insertimage', null, getRandomHtml(10));
+							break;
+						case 26:
+							logger.log("document.execCommand('insertparagraph', null, true);","broasword",1);
+							document.execCommand('insertparagraph', null, true);
+							break;
+						case 27:
+							logger.log("document.execCommand('insertparagraph', null, true);","broasword",1);
+							document.execCommand('strikethrough', null, true);
+							break;
+						case 28:
+							logger.log("document.execCommand('unlink', null, true);","broasword",1);
+							document.execCommand('unlink', null, true);
+							break;
+						case 29:
+							logger.log("document.execCommand('inserthorizontalrule', null, true);","broasword",1);
+							document.execCommand('inserthorizontalrule', null, true);
+							break;
+						case 30:
+							logger.log("document.execCommand('insertunorderedlist', null, true);","broasword",1);
+							document.execCommand('insertunorderedlist', null, true);
+							break;
+						case 31:
+							logger.log("document.execCommand('stylewithcss', null, !getRandom(2));","broasword",1);
+							document.execCommand('stylewithcss', null, !getRandom(2));
+							break;
+						case 32:
+							logger.log("document.execCommand('usecss', null, !getRandom(2));","broasword",1);
+							document.execCommand('usecss', null, !getRandom(2));
+							break;
+						case 33:
+							logger.log("document.execCommand('justifyleft', null, true);","broasword",1);
+							document.execCommand('justifyleft', null, true);
+							break;
+						case 34:
+							logger.log("document.execCommand('justifyfull', null, true);","broasword",1);
+							document.execCommand('justifyfull', null, true);
+							break;
+						case 35:
+							document.execCommand("insertHTML", false, "<span class='own-class'>"+ document.getSelection()+"</span>");
+							break;
+						case 36:
+						case 37:
+						case 38:
+						case 39:
+						case 40:
+							logger.log("document.execCommand('removeformat', null, true);","broasword",1);
+							document.execCommand('removeformat', null, true);
+							break;
+						case 41:
+							logger.log("document.execCommand('absoluteposition', null, true);","broasword",1);
+							document.execCommand('absoluteposition', null, true);
+							break;
+						case 42:
+							logger.log("document.execCommand('overwrite', null, !getRandom(2));","broasword",1);
+							document.execCommand('overwrite', null, !getRandom(100));
+							break;
+						case 43:
+							logger.log("document.execCommand('2d-position', null, !getRandom(2));","broasword",1);
+							document.execCommand('2d-position', null, !getRandom(2100));
+					}
+				} catch(ex) {
+				
+				}
+			}
+			
+			function fuzzIt() {
+				var s = new Date();
+				function shouldStop() {
+					if (new Date() - s > 1000) {
+						return true;
+					}
+				}
+				if (!$('a')) {
+					logger.log("document.body.innerHTML = '<div contentEditable id="+ +"></div>';","broasword",1);
+					document.body.innerHTML = '<div contentEditable id="a"></div>';
+				}
+				replaceContent($('a'));
+				for (var i = 0; i < 10000; i++) {
+					function selectSomething() {
+						try {
+							var range = document.createRange();
+							var sNode = randomNode(), eNode = randomNode();
+							logger.log("range.setStart(sNode, getRandom(sNode.length + 1));","broasword",1);
+							range.setStart(sNode, getRandom(sNode.length + 1));
+							logger.log("range.setEnd(eNode, getRandom(eNode.length + 1));","broasword",1);
+							range.setEnd(eNode, getRandom(eNode.length + 1));
+							logger.log("getSelection().removeAllRanges();","broasword",1);
+							getSelection().removeAllRanges();
+							logger.log("getSelection().addRange(range);","broasword",1);
+							getSelection().addRange(range);
+						} catch(msie) {
+							var elements = document.getElementsByTagName('*');
+							var elt1 = elements[getRandom(elements.length)];
+							try {
+								var elt2 = elements[getRandom(elements.length)];
+								var range1 = document.body.createTextRange();
+								logger.log("range1.moveToElementText(elt1);","broasword",1);
+								range1.moveToElementText(elt1);
+								logger.log("range1.moveStart('character', getRandom(range1.text.length + 1));","broasword",1);
+								range1.moveStart('character', getRandom(range1.text.length + 1));
+								range1.collapse(true);
+								var range2 = document.body.createTextRange();
+								logger.log("range2.moveToElementText(elt2);","broasword",1);
+								range2.moveToElementText(elt2);
+								logger.log("range2.moveStart('character', getRandom(range2.text.length + 1));","broasword",1);
+								range2.moveStart('character', getRandom(range2.text.length + 1));
+								range2.collapse(true);
+								logger.log("range1.setEndPoint('EndToStart',  range2);","broasword",1);
+								range1.setEndPoint('EndToStart',  range2);
+								range1.select();
+							} catch(argh) {
+								try {
+									var range = document.body.createTextRange();
+									logger.log("range.moveToElementText(elt1);","broasword",1);
+									range.moveToElementText(elt1);
+									range.select();
+								} catch(whatever) { }
+							}
+						}	
+					}
+					function randomNode() {
+						logger.log("nodes[getRandom(nodes.length)];","broasword",1);
+						return nodes[getRandom(nodes.length)];
+					}
+					var nodes = getNodes($('a'));
+					if (!nodes.length) {
+						logger.log("replaceContent($('+a+'));","broasword",1);
+						replaceContent($('a'));
+						continue;
+					}
+					$('a').focus();
+					selectSomething();
+					var x = $('a').getClientRects();
+					var iterations = getRandom(3);
+					for (var j = 0; j < iterations; j++) {
+						if (/*!/MSIE/.test(navigator.userAgent) &&*/ (i % 50 == 8)) {
+							document.body.normalize(true);
+							selectSomething();
+						}
+						bustAMove();
+						try {
+							if (document.abc) {
+								try {
+									logger.log("document.qq = document.abc.cloneContents();","broasword",1);
+									document.qq = document.abc.cloneContents();
+								} catch(abwewe) { }
+							}
+							logger.log("document.abc = getSelection().getRangeAt(0);","broasword",1);
+							document.abc = getSelection().getRangeAt(0);
+						} catch(awiewe) { }
+					}
+					for (var j = 0; j < nodes.length; j++) {
+						logger.log("window.z = nodes[j].nodeType;","broasword",1);
+						window.z = nodes[j].nodeType;
+						logger.log("window.zz = nodes[j].outerHTML;","broasword",1);
+						window.zz = nodes[j].outerHTML;
+						if (j % 100 == 5) {
+							try {
+								logger.log("nodes[j].appendChild(nodes + [j+1] +);","broasword",1);
+								nodes[j].appendChild(nodes[j+1]);
+							} catch(exx) {
+							
+							}
+						}
+						if (j % 50 == 7) {
+							try {
+								logger.log("nodes[j].style.direction = !getRandom(2) ? 'rtl' : '++';","broasword",1);
+								nodes[j].style.direction = !getRandom(2) ? 'rtl' : '';
+							} catch(exx) {
+							
+							}
+						}
+					}
+					if (shouldStop()) {
+						return;
+					}
+				}
+			}
+			
+			if (/pausefirst/.test(location)) {
+				prompt('click ok to start fuzzing');
+			}
+			setInterval(fuzzIt, 500);
+			var dx = new Date();
+			//while (new Date() - dx < 3000) ;
+			fuzzIt();
+			
+			/* END YOUR FUZZING CODE HERE */
+
+			logger.finished();
+			
+			window.location.href = window.location.protocol + '//' + window.location.host + '/finalfuzz/server/';
+		}
+	
+	</script>
+	
+</head>
+
+<body onload=grind()></body>
+
+</html>
