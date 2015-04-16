@@ -1,0 +1,4 @@
+Browser fuzzer written in Javascript.
+To find UAF bugs in browsers
+Currently fuzzer uses grinder to log the crash details
+Need to add create a different logging mechanism
